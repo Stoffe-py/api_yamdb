@@ -11,6 +11,7 @@ only_admin = Q(role='admin') & Q(is_staff=True)
 only_not_admin = Q(role__in=('user', 'moderator')) & Q(is_staff=False)
 
 
+
 class User(AbstractUser):
     CHOICES = (
         ('user', 'пользователь'),
