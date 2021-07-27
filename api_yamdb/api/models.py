@@ -1,11 +1,14 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import (
-    CharField, CheckConstraint, EmailField, Q, TextField, UniqueConstraint
+    CharField, CheckConstraint, EmailField, Q, TextField
 )
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from .managers import APIUserManager
+from .validators import (custom_year_validator)
+
 
 only_admin = Q(role='admin') & Q(is_staff=True)
 only_not_admin = Q(role__in=('user', 'moderator')) & Q(is_staff=False)
@@ -49,18 +52,8 @@ class User(AbstractUser):
 
 
 class Reviews(models.Model):
-    CHOOSE_RATING = (
-        (1, 1),
-        (2, 2),
-        (3, 3),
-        (4, 4),
-        (5, 5),
-        (6, 6),
-        (7, 7),
-        (8, 8),
-        (9, 9),
-        (10, 10),
-    )
+    CHOOSE_RATING = (MinValueValidator(1, 'Меньше 1 поставить нельзя'),
+                    MaxValueValidator(10, 'Больше 10 поставить нельзя'))
 
     author = models.ForeignKey('User', on_delete=models.CASCADE,
                                related_name='reviews',
@@ -73,19 +66,6 @@ class Reviews(models.Model):
                                     auto_now_add=True)
     score = models.PositiveSmallIntegerField(verbose_name='Оценка',
                                              choices=CHOOSE_RATING)
-
-    class Meta:
-        verbose_name = 'Отзыв'
-        verbose_name_plural = 'Отзывы'
-        constraints = (
-            UniqueConstraint(
-                name='reviews-unique-author',
-                fields=('author', 'title')
-            ),
-        )
-
-    def __str__(self):
-        return self.text[:15]
 
 
 class Comments(models.Model):
@@ -134,13 +114,15 @@ class Genres(models.Model):
 
 class Titles(models.Model):
     name = models.CharField(verbose_name='Название', max_length=200)
-    year = models.PositiveSmallIntegerField(
-        verbose_name='Год создания',
-        blank=True, null=True
+    year = models.IntegerField(
+        null=True,
+        verbose_name='Год',
+        validators=[
+            custom_year_validator
+        ]
     )
     description = models.TextField(
         verbose_name='Описание',
-        blank=True, null=True
     )
     genre = models.ManyToManyField(
         Genres,
