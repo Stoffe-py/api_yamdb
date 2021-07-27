@@ -53,7 +53,7 @@ class User(AbstractUser):
 
 class Reviews(models.Model):
     CHOOSE_RATING = (MinValueValidator(1, 'Меньше 1 поставить нельзя'),
-                    MaxValueValidator(10, 'Больше 10 поставить нельзя'))
+                     MaxValueValidator(10, 'Больше 10 поставить нельзя'))
 
     author = models.ForeignKey('User', on_delete=models.CASCADE,
                                related_name='reviews',

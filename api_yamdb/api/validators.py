@@ -1,6 +1,5 @@
 from datetime import datetime
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, MinValueValidator
 
 RANGE_ERROR_MESSAGE = 'Entered value must be between 1 and 10'
 
